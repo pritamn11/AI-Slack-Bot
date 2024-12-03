@@ -25,8 +25,9 @@ SECRET_KEY = 'django-insecure-tx^*7)n09(^ons5w=4@cqhur6_h%76#7^0hqywbjk@x4)1087c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [".pritam.space",'127.0.0.1', 'localhost']
 
+CSRF_TRUSTED_ORIGINS = ["https://home.pritam.space/",]
 
 # Application definition
 
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bot',
 ]
 
 MIDDLEWARE = [

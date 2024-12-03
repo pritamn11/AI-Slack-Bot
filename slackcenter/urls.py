@@ -20,5 +20,5 @@ from bot.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',slack_event_endpoints),
+    path('bot/events/',slack_event_endpoints),
 ]
