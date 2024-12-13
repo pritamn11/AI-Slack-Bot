@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [".pritam.space",'127.0.0.1', 'localhost']
 
-CSRF_TRUSTED_ORIGINS = ["https://home.pritam.space/",]
+CSRF_TRUSTED_ORIGINS = ["https://bot.pritam.space/",]
 
 # Application definition
 
