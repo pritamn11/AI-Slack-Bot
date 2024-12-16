@@ -3,29 +3,11 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json 
-import helpers 
 from pprint import pprint
-
-SLACK_BOT_OAUTH_TOKEN = helpers.config("SLACK_BOT_OAUTH_TOKEN", default=None, cast=str)
+import slacky
+from .tasks import slack_message_task
 
 # Create your views here.
-
-
-def send_message(message, channel_id=None, user_id=None):
-    url = "https://slack.com/api/chat.postMessage"
-    headers = {
-        "Content-Type": "application/json; charset-utf8",
-        "Authorization": f"Bearer {SLACK_BOT_OAUTH_TOKEN}",
-        "Accept": "application/json" 
-    }
-    if user_id is not None:
-        message = f"<@{user_id}>{message}" 
-    data = {
-        "channel": f"{channel_id}",
-        "text": f"{message}".strip() 
-    }
-    return requests.post(url,json=data, headers=headers)
-
 
 @csrf_exempt
 @require_POST
@@ -52,14 +34,19 @@ def slack_event_endpoints(request):
         event = json_data.get('event') or {}
         pprint(event)
         try:
-            msg_text = msg_text = event['blocks'][0]['elements'][0]['elements'][1]['text']
+            msg_text = event['blocks'][0]['elements'][0]['elements'][1]['text']
         except:
             msg_text = event.get('text')
         user_id = event.get('user')
         channel_id = event.get('channel')
-        r = send_message(message=msg_text, channel_id=channel_id, user_id=user_id)
-        return HttpResponse("Success", status=r.status_code)
+        msg_ts = event.get('ts') 
+        thread_ts = event.get('thread_ts') or msg_ts
+        # r = slacky.send_message(message=msg_text, channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
+        slack_message_task.delay(message=f"Calling from delay...{msg_text}", channel_id=channel_id, user_id=user_id, thread_ts=thread_ts)
+        slack_message_task.apply_async(kwargs={'message':f"apply async..{msg_text}", 'channel_id':channel_id, 'user_id':user_id, 'thread_ts':thread_ts},countdown=30)
+        return HttpResponse("Success", status=200)
     return HttpResponse("Success",status=200)
+
 
 # @csrf_exempt 
 # @require_POST
